@@ -9,6 +9,7 @@ public class OpenPackage : MonoBehaviour
     public GameObject cardPool;
 
     CardStore CardStore;
+    List<GameObject> cards = new List<GameObject>();
     // Start is called before the first frame update
     void Start()
     {
@@ -22,11 +23,22 @@ public class OpenPackage : MonoBehaviour
     }
     public void OnclickOpen()
     {
+        ClearPool();
         for (int i = 0; i < 5; i++)
         {
-            GameObject newCard = GameObject.Instantiate(cardPrefab);
+            GameObject newCard = GameObject.Instantiate(cardPrefab, cardPool.transform);
             newCard.GetComponent<CardDisplay>().card = CardStore.RandomCard();
 
+            cards.Add(newCard);
         }
+    }
+    public void ClearPool()
+    {
+        foreach (var card in cards)
+        {
+            Destroy(card);
+        }
+        cards.Clear();
+
     }
 }

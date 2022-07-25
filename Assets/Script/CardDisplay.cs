@@ -13,6 +13,11 @@ public class CardDisplay : MonoBehaviour
     
     public Text effectText;
     public Image backgroundImage;
+    public Image backgroundImage1;
+    public Image backgroundImage2;
+    public Image backgroundImage3;
+    public Image backgroundImage4;
+
 
 
     public Card card;
@@ -37,6 +42,7 @@ public class CardDisplay : MonoBehaviour
             attackText.text = element.attack.ToString();
             levelPointText.text = element.levelPoint.ToString();
             effectText.gameObject.SetActive(false);
+            
         }else if(card is SpecialCard)
         {
             var special = card as SpecialCard;
