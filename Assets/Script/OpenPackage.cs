@@ -10,6 +10,8 @@ public class OpenPackage : MonoBehaviour
 
     CardStore CardStore;
     List<GameObject> cards = new List<GameObject>();
+
+    public PlayData playData;
     // Start is called before the first frame update
     void Start()
     {
@@ -23,6 +25,12 @@ public class OpenPackage : MonoBehaviour
     }
     public void OnclickOpen()
     {
+        if (playData.playerCoin < 2)
+        {
+            return;
+        }else{
+            playData.playerCoin = playData.playerCoin - 2;
+        }
         ClearPool();
         for (int i = 0; i < 5; i++)
         {
@@ -31,6 +39,8 @@ public class OpenPackage : MonoBehaviour
 
             cards.Add(newCard);
         }
+        SaveCardData();
+        playData.SavePlayData();
     }
     public void ClearPool()
     {
@@ -40,5 +50,14 @@ public class OpenPackage : MonoBehaviour
         }
         cards.Clear();
 
+    }
+
+    public void SaveCardData()
+    {
+        foreach (var card in cards)
+        {
+            int id = card.GetComponent<CardDisplay>().card.id;
+            playData.playerCards[id] += 1;
+        }
     }
 }

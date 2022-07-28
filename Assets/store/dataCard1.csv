@@ -1,9 +1,9 @@
 #,編號,卡名,等級,攻擊
-element,1,FIRE,1,2
-element,2,WATER,1,1
-element,3,WOOD,1,1
-element,4,LIGHT,1,2
-element,5,DARK,1,2
+element,0,FIRE,1,2
+element,1,WATER,1,1
+element,2,WOOD,1,1
+element,3,LIGHT,1,2
+element,4,DARK,1,2
 #,編號,卡名,效果,
-special,6,開悟,合成後效果+1階,
-special,7,干擾,分解對手合成後技能,
+special,5,開悟,合成後效果+1階,
+special,6,干擾,分解對手合成後技能,

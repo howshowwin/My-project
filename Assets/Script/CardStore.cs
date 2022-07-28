@@ -9,8 +9,8 @@ public class CardStore : MonoBehaviour
     public List<Card> cardList = new List<Card>();
     void Start()
     {
-        loadCardData();
-        TestLoad();
+        // loadCardData();
+        // TestLoad();
     }
 
     // Update is called once per frame
