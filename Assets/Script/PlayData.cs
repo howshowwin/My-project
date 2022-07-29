@@ -8,6 +8,8 @@ public class PlayData : MonoBehaviour
     public CardStore CardStore;
     public int playerCoin;
     public int[] playerCards;
+    public int[] playerDeck;
+
     public TextAsset playData;
     void Start()
     {
@@ -23,6 +25,8 @@ public class PlayData : MonoBehaviour
     public void LoadPlayData()
     {
         playerCards = new int[CardStore.cardList.Count];
+        playerDeck = new int[CardStore.cardList.Count];
+
         string[] dataRow = playData.text.Split("\n");
         foreach (var row in dataRow)
         {
@@ -42,6 +46,12 @@ public class PlayData : MonoBehaviour
                 playerCards[id] = num;
 
             }
+            else if (rowArray[0] == "deck")
+            {
+                int id = int.Parse(rowArray[1]);
+                int num = int.Parse(rowArray[2]);
+                playerDeck[id] = num;
+            }
         }
     }
     public void SavePlayData()
@@ -57,7 +67,13 @@ public class PlayData : MonoBehaviour
                 datas.Add("card," + i.ToString() + "," + playerCards[i].ToString());
             }
         }
+        for (int i = 0; i < playerDeck.Length; i++)
+        {
+            if(playerDeck[i]!=0){
+                datas.Add("deck," + i.ToString() + "," + playerDeck[i].ToString());
 
+            }
+        }
         File.WriteAllLines(path, datas);
     }
 }
