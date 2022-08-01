@@ -10,14 +10,14 @@ public enum CardState
 
 public class ClickCard : MonoBehaviour, IPointerDownHandler
 {
-    private PlayData PlayData;
-    private DeckManger DeckManger;
+    // private PlayData PlayData;
+    private DeckManager DeckManager;
     public CardState state;
     // Start is called before the first frame update
     void Start()
     {
-        DeckManger = GameObject.Find("DataManager").GetComponent<DataManager>();
-        PlayData = GameObject.Find("DataManager").GetComponent<PlayData>();
+        DeckManager = GameObject.Find("DeckManager").GetComponent<DeckManager>();
+        // PlayData = GameObject.Find("DataManager").GetComponent<PlayData>();
     }
 
     // Update is called once per frame
@@ -28,10 +28,6 @@ public class ClickCard : MonoBehaviour, IPointerDownHandler
     public void OnPointerDown(PointerEventData pointerEventData)
     {
         int id = this.GetComponent<CardDisplay>().card.id;
-        if(state == CardState.Deck){
-
-        }else if(state == CardState.Library){
-
-        }
+        DeckManager.UpdateCard(state, id);
     }
 }
