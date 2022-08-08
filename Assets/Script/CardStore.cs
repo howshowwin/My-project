@@ -55,13 +55,28 @@ public class CardStore : MonoBehaviour
     {
         foreach (var item in cardList)
         {
-            Debug.Log("卡:" + item.id.ToString()+ item.cardName);
+            Debug.Log("卡:" + item.id.ToString() + item.cardName);
         }
     }
 
     public Card RandomCard()
     {
-        Card card = cardList[Random.Range(0,cardList.Count)];
+        Card card = cardList[Random.Range(0, cardList.Count)];
         return card;
+    }
+    public Card CopyCard(int _id)
+    {
+        Card copyCard = new Card(_id, cardList[_id].cardName);
+        if (cardList[_id] is ElementCard)
+        {
+            var elementcard = cardList[_id] as ElementCard;
+            copyCard = new ElementCard(_id, elementcard.cardName, elementcard.attack, elementcard.levelPoint);
+        }
+        else if (cardList[_id] is SpecialCard)
+        {
+            var specialcard = cardList[_id] as SpecialCard;
+            copyCard = new SpecialCard(_id, specialcard.cardName, specialcard.effect);
+        }
+        return copyCard;
     }
 }
