@@ -1,12 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 public enum GamePhase
 {
     gameStart, playerDraw, playerAction, enemyDraw, enemyAction
 }
-public class BattleManager : MonoBehaviour
+public class BattleManager : Monosingletion<BattleManager>
 {
+    public static BattleManager Instance;
     public PlayData playData;
     public PlayData enemyData;
 
@@ -27,10 +29,22 @@ public class BattleManager : MonoBehaviour
 
     public GamePhase GamePhase = GamePhase.gameStart;
 
+    public UnityEvent phaseChnageEvent = new UnityEvent();
+
+    public int[] SummonCountMax = new int[2];
+    private int[] SummonCounter = new int[2];
+
+    private GameObject waitingCard;
+    private int waitingPlayer;
+    private void Awake()
+    {
+        Instance = this;
+    }
     // Start is called before the first frame update
     void Start()
     {
         GameStart();
+
     }
 
     // Update is called once per frame
@@ -49,6 +63,8 @@ public class BattleManager : MonoBehaviour
         DrawCard(0, 5);
         DrawCard(1, 5);
         GamePhase = GamePhase.playerDraw;
+
+        SummonCounter = SummonCountMax;
 
     }
 
@@ -113,9 +129,9 @@ public class BattleManager : MonoBehaviour
         if (GamePhase == GamePhase.playerDraw)
         {
             DrawCard(0, 1);
+            GamePhase = GamePhase.playerAction;
         }
-
-        GamePhase = GamePhase.playerAction;
+        phaseChnageEvent.Invoke();
     }
 
     public void OnEnemyDraw()
@@ -123,8 +139,10 @@ public class BattleManager : MonoBehaviour
         if (GamePhase == GamePhase.enemyDraw)
         {
             DrawCard(1, 1);
+            GamePhase = GamePhase.enemyAction;
         }
-        GamePhase = GamePhase.enemyAction;
+        phaseChnageEvent.Invoke();
+
     }
 
     public void DrawCard(int _player, int _count)
@@ -148,6 +166,7 @@ public class BattleManager : MonoBehaviour
         {
             GameObject card = Instantiate(cardPrefab, hand);
             card.GetComponent<CardDisplay>().card = drawDeck[0];
+            card.GetComponent<BattleCard>().playerID = _player;
             drawDeck.RemoveAt(0);
         }
     }
@@ -165,7 +184,66 @@ public class BattleManager : MonoBehaviour
         {
             GamePhase = GamePhase.playerDraw;
         }
+        phaseChnageEvent.Invoke();
     }
-
+    public void SummonRequest(int _player, GameObject _elementCard)
+    {
+        GameObject[] blocks = playerBlock;
+        bool hasEmptyBlock = false;
+        if (_player == 0 && GamePhase == GamePhase.playerAction)
+        {
+            blocks = playerBlock;
+        }
+        else if (_player == 1 && GamePhase == GamePhase.enemyAction)
+        {
+            blocks = enemyBlock;
+        }
+        else
+        {
+            return;
+        }
+        if (SummonCounter[_player] > 0)
+        {
+            foreach (var block in blocks)
+            {
+                if (block.GetComponent<Blockcon>().card == null)
+                {
+                    block.GetComponent<Blockcon>().SummonBlock.SetActive(true);
+                    // waitingCard = _elementCard;
+                    hasEmptyBlock = true;
+                }
+            }
+        }
+        if (hasEmptyBlock)
+        {
+            waitingCard = _elementCard;
+            waitingPlayer = _player;
+        }
+    }
+    public void SummonConfirm(Transform _block)
+    {
+        Summon(waitingPlayer, waitingCard, _block);
+        GameObject[] blocks = playerBlock;
+        if (waitingPlayer == 0)
+        {
+            blocks = playerBlock;
+        }
+        else if (waitingPlayer == 1)
+        {
+            blocks = enemyBlock;
+        }
+        foreach (var block in blocks)
+        {
+            block.GetComponent<Blockcon>().SummonBlock.SetActive(false);
+        }
+    }
+    public void Summon(int _player, GameObject _elementCard, Transform _block)
+    {
+        _elementCard.transform.SetParent(_block);
+        _elementCard.transform.localPosition = Vector3.zero;
+        _elementCard.GetComponent<BattleCard>().state = BattleCardState.inBlock;
+        _block.GetComponent<Blockcon>().card = _elementCard;
+        SummonCounter[_player]--;
+    }
 
 }
