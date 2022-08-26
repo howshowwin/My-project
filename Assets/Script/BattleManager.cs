@@ -36,6 +36,16 @@ public class BattleManager : Monosingletion<BattleManager>
 
     private GameObject waitingCard;
     private int waitingPlayer;
+
+
+    public GameObject ArrowPrefab;
+    private GameObject arrow;
+    public GameObject canvas;
+
+    private GameObject attackingMonster;
+    private int attackingPlayer;
+    public GameObject attackArrow;
+
     private void Awake()
     {
         Instance = this;
@@ -50,7 +60,12 @@ public class BattleManager : Monosingletion<BattleManager>
     // Update is called once per frame
     void Update()
     {
-
+        if (Input.GetMouseButton(1))
+        {
+            DestroyArrow();
+            waitingCard = null;
+            CloseBlocks();
+        }
     }
     //加載數據-洗牌-抽基本手排
     //回合結束-遊戲階段
@@ -62,7 +77,7 @@ public class BattleManager : Monosingletion<BattleManager>
 
         DrawCard(0, 5);
         DrawCard(1, 5);
-        GamePhase = GamePhase.playerDraw;
+        NextPhase();
 
         SummonCounter = SummonCountMax;
 
@@ -129,9 +144,8 @@ public class BattleManager : Monosingletion<BattleManager>
         if (GamePhase == GamePhase.playerDraw)
         {
             DrawCard(0, 1);
-            GamePhase = GamePhase.playerAction;
+            NextPhase();
         }
-        phaseChnageEvent.Invoke();
     }
 
     public void OnEnemyDraw()
@@ -139,9 +153,9 @@ public class BattleManager : Monosingletion<BattleManager>
         if (GamePhase == GamePhase.enemyDraw)
         {
             DrawCard(1, 1);
-            GamePhase = GamePhase.enemyAction;
+            NextPhase();
         }
-        phaseChnageEvent.Invoke();
+
 
     }
 
@@ -176,15 +190,89 @@ public class BattleManager : Monosingletion<BattleManager>
     }
     public void TurnEnd()
     {
-        if (GamePhase == GamePhase.playerAction)
+        if (GamePhase == GamePhase.playerAction || GamePhase == GamePhase.enemyAction)
         {
-            GamePhase = GamePhase.enemyDraw;
+            NextPhase();
         }
-        else if (GamePhase == GamePhase.enemyAction)
+
+
+    }
+    public void NextPhase()
+    {
+        if ((int)GamePhase == System.Enum.GetNames(GamePhase.GetType()).Length - 1)
         {
             GamePhase = GamePhase.playerDraw;
         }
+        else
+        {
+            GamePhase += 1;
+        }
         phaseChnageEvent.Invoke();
+
+    }
+
+    public void AttackRequest(int _player, GameObject _elementCard)
+    {
+        GameObject[] blocks = playerBlock;
+        bool hasMonsterBlock = false;
+        if (_player == 0 && GamePhase == GamePhase.playerAction)
+        {
+            blocks = enemyBlock;
+        }
+        else if (_player == 1 && GamePhase == GamePhase.enemyAction)
+        {
+            blocks = playerBlock;
+        }
+        else
+        {
+            return;
+        }
+        foreach (var block in blocks)
+        {
+            if (block.GetComponent<Blockcon>().card != null)
+            {
+                block.GetComponent<Blockcon>().AttackBlock.SetActive(true);
+                block.GetComponent<Blockcon>().card.GetComponent<AttackTarget>().attackable = true;
+                hasMonsterBlock = true;
+            }
+        }
+        if (hasMonsterBlock)
+        {
+            attackingMonster = _elementCard;
+            attackingPlayer = _player;
+            CreatArrow(_elementCard.transform, attackArrow);
+        }
+
+    }
+    public void AttackConfirm(GameObject _target)
+    {
+        Attack(attackingMonster, _target);
+        DestroyArrow();
+        CloseBlocks();
+        GameObject[] blocks;
+        blocks = enemyBlock;
+        if (attackingPlayer == 0)
+        {
+            blocks = enemyBlock;
+        }
+        else
+        {
+            blocks = playerBlock;
+        }
+        foreach (var block in blocks)
+        {
+            if (block.GetComponent<Blockcon>().card != null)
+            {
+                block.GetComponent<Blockcon>().card.GetComponent<AttackTarget>().attackable = false;
+            }
+        }
+    }
+    public void Attack(GameObject _attacker, GameObject _target)
+    {
+        ElementCard element = GetComponent<CardDisplay>().card as ElementCard;
+        _target.GetComponent<AttackTarget>().ApplyDamage(element.attack);
+        _attacker.GetComponent<BattleCard>().CostAttackCount();
+        _target.GetComponent<CardDisplay>().ShowCard();
     }
     public void SummonRequest(int _player, GameObject _elementCard)
     {
@@ -218,6 +306,8 @@ public class BattleManager : Monosingletion<BattleManager>
         {
             waitingCard = _elementCard;
             waitingPlayer = _player;
+            CreatArrow(_elementCard.transform, ArrowPrefab);
+            arrow.transform.SetParent(canvas.transform, false); ;
         }
     }
     public void SummonConfirm(Transform _block)
@@ -236,6 +326,7 @@ public class BattleManager : Monosingletion<BattleManager>
         {
             block.GetComponent<Blockcon>().SummonBlock.SetActive(false);
         }
+        DestroyArrow();
     }
     public void Summon(int _player, GameObject _elementCard, Transform _block)
     {
@@ -244,6 +335,40 @@ public class BattleManager : Monosingletion<BattleManager>
         _elementCard.GetComponent<BattleCard>().state = BattleCardState.inBlock;
         _block.GetComponent<Blockcon>().card = _elementCard;
         SummonCounter[_player]--;
+
+        ElementCard mc = _elementCard.GetComponent<CardDisplay>().card as ElementCard;
+        _elementCard.GetComponent<BattleCard>().AttackCount = mc.attackCount;
+        _elementCard.GetComponent<BattleCard>().ResetAttack();
     }
 
+
+    public void CreatArrow(Transform _stratPoint, GameObject _prefab)
+    {
+        DestroyArrow();
+        arrow = GameObject.Instantiate(_prefab, _stratPoint);
+        arrow.GetComponent<Arrow>().SetStartPoint(new Vector2(_stratPoint.position.x, _stratPoint.position.y));
+
+    }
+    public void DestroyArrow()
+    {
+        Destroy(arrow);
+        Destroy(attackArrow);
+
+    }
+
+    public void CloseBlocks()
+    {
+        foreach (var block in playerBlock)
+        {
+            block.GetComponent<Blockcon>().SummonBlock.SetActive(false);
+            block.GetComponent<Blockcon>().AttackBlock.SetActive(false);
+
+        }
+        foreach (var block in enemyBlock)
+        {
+            block.GetComponent<Blockcon>().SummonBlock.SetActive(false);
+            block.GetComponent<Blockcon>().AttackBlock.SetActive(false);
+
+        }
+    }
 }

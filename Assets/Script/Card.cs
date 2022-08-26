@@ -16,12 +16,13 @@ public class ElementCard : Card
     public int attack;
     public int levelPoint;
     // public int typeElement;
-
+    public int attackCount;
 
     public ElementCard(int _id, string _cardName, int _attack, int _levelPoint) : base(_id, _cardName)
     {
         this.attack = _attack;
         this.levelPoint = _levelPoint;
+        attackCount = 2;
         // this.typeElement = _typeElement;
     }
 }

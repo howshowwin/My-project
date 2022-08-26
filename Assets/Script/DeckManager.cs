@@ -91,7 +91,7 @@ public class DeckManager : MonoBehaviour
             {
                 libraryDic.Remove(_id);
             }
-           
+
         }
     }
     public void CreatCard(int _id, CardState _cardState)

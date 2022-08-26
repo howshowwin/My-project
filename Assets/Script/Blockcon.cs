@@ -7,6 +7,7 @@ public class Blockcon : MonoBehaviour, IPointerDownHandler
     // Start is called before the first frame update
     public GameObject card;
     public GameObject SummonBlock;
+    public GameObject AttackBlock;
     void Start()
     {
 

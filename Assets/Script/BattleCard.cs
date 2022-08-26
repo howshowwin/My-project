@@ -11,6 +11,9 @@ public class BattleCard : MonoBehaviour, IPointerDownHandler
 {
     public int playerID;
     public BattleCardState state = BattleCardState.inHand;
+
+    public int AttackCount;
+    private int attackCount;
     public void OnPointerDown(PointerEventData pointerEventData)
     {
         if (GetComponent<CardDisplay>().card is ElementCard)
@@ -19,13 +22,22 @@ public class BattleCard : MonoBehaviour, IPointerDownHandler
             {
                 BattleManager.Instance.SummonRequest(playerID, gameObject);
             }
-
+            if (state == BattleCardState.inBlock && attackCount > 0)
+            {
+                BattleManager.Instance.AttackRequest(playerID, gameObject);
+            }
         }
 
         //in hand
 
     }
+    public void ResetAttack(){
+        attackCount = AttackCount;
+    }
     // Start is called before the first frame update
+    public void CostAttackCount(){
+        attackCount--;
+    }
     void Start()
     {
 
