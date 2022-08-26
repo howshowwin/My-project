@@ -990,6 +990,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   SummonCountMax: 0200000002000000
+  ArrowPrefab: {fileID: 6034038971901651014, guid: 86e10ccd96e320e44b5061045a33306b, type: 3}
+  canvas: {fileID: 122252927}
+  attackArrow: {fileID: 6034038971901651014, guid: 85a4763f02aa28e40bc572c8167a2b18, type: 3}
 --- !u!4 &716121474
 Transform:
   m_ObjectHideFlags: 0
